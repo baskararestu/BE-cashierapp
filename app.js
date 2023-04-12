@@ -3,8 +3,8 @@ const { userRouter } = require('./router')
 require('dotenv').config()
 const env = process.env
 
-
 const app = express()
+app.use(express.json())
 
 app.use('/user', userRouter)
 
