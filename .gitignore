@@ -1,7 +1,9 @@
 .idea
-node_modules
 .env
 
 package-lock.json
 
 .vscode
+
+# node modules
+node_modules/
