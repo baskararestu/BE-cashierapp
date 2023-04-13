@@ -9,7 +9,6 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
-app.use('/user', userRouter)
 app.use('/auth', authRouter)
 
 app.listen(env.APP_PORT, () => {
