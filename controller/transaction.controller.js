@@ -87,8 +87,7 @@ const getGrossIncomeByDate = async (req, res) => {
   }
 }
 
-// default get at least 7 last day,
-// can see by date range
+//
 const getTotalTransaction = async (req, res) => {
   try {
     const id_user = getUserIdFromToken(req, res)
