@@ -16,13 +16,13 @@ module.exports = {
       const userId = userToken.id
       console.log(userId)
 
-      // now you can use the user ID to add the products
+      //use the user ID to add the products
       const query = `INSERT INTO products (id_product, name, price,image,description,id_category,stock,id_user) VALUES (null, ${db.escape(
         name
       )}, ${db.escape(price)},${db.escape(image)},${db.escape(
         description
       )},${db.escape(id_category)},${db.escape(stock)},${db.escape(userId)})`
-      const result = await db.query(query)
+      const [result] = await db.query(query)
       console.log(result)
 
       res.status(200).json({ message: 'Product added successfully' })
@@ -57,15 +57,14 @@ module.exports = {
       res.status(200).json({
         message: 'Get product success',
         data: rows,
-        pages:{
+        pages: {
           current: page,
-          total: totalPages
-        }
+          total: totalPages,
+        },
       })
-
     } catch (error) {
       console.error(error)
       res.status(500).json({ message: 'Internal server error' })
     }
-  }
+  },
 }
