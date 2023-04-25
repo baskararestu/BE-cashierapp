@@ -1,5 +1,6 @@
 const { db } = require('../database')
 const jwt = require('jsonwebtoken')
+const { getUserIdFromToken } = require('../helper/jwt-payload.helper')
 
 module.exports = {
   addProductsCurrentUser: async (req, res) => {
@@ -33,14 +34,7 @@ module.exports = {
   },
   getProduct: async (req, res) => {
     try {
-      const authToken = req.headers.authorization?.split(' ')[1] // extract the token from the headers
-      if (!authToken) {
-        return res.status(401).json({ message: 'Unauthorized' })
-      }
-      console.log(authToken)
-      const userToken = jwt.verify(authToken, 'group08') // verify the token using your secret key
-      // if the token is valid, the decodedToken object will contain the user's ID
-      const userId = userToken.id
+     const userId = getUserIdFromToken(req, res)
 
       const page = parseInt(req.query.page) || 1
       const limit = parseInt(req.query.limit) || 10
@@ -64,7 +58,7 @@ module.exports = {
       })
     } catch (error) {
       console.error(error)
-      res.status(500).json({ message: 'Internal server error' })
+      res.status(500).json({ message: error.message })
     }
   },
 }
