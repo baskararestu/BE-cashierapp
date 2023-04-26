@@ -81,7 +81,7 @@ const login = async (req, res) => {
     let payload = {
       id: user.id_user,
     }
-    const token = jwt.sign(payload, 'rahasia', { expiresIn: '1h' })
+    const token = jwt.sign(payload, 'group08', { expiresIn: '1h' })
 
     // If we get here, the email and password are valid
     res.json({
