@@ -18,8 +18,8 @@ module.exports = {
       console.log(userId)
 
       // use the category name to get its id from the categories table
-      const selectCategoryQuery = `SELECT id_category FROM categories WHERE name = ${db.escape(
-        category
+      const selectCategoryQuery = `SELECT id_category FROM categories WHERE id_category = ${db.escape(
+        id_category
       )}`
       const [categoryResult] = await db.query(selectCategoryQuery)
       const categoryId = categoryResult[0].id_category
@@ -127,6 +127,47 @@ module.exports = {
         message: 'Internal server error',
         data: {},
       })
+    }
+  },
+
+  editProducts: async (req, res) => {
+    try {
+      const {
+        id_product,
+        name,
+        price,
+        image,
+        description,
+        id_category,
+        stock,
+      } = req.body
+      const userId = getUserIdFromToken(req, res)
+      console.log(userId)
+
+      // use the category name to get its id from the categories table
+      const selectCategoryQuery = `SELECT id_category FROM categories WHERE id_category = ${db.escape(
+        id_category
+      )}`
+      const [categoryResult] = await db.query(selectCategoryQuery)
+      const categoryId = categoryResult[0].id_category
+
+      //use the user ID to edit the products
+      const query = `UPDATE products SET name = ${db.escape(
+        name
+      )}, price = ${db.escape(price)}, image = ${db.escape(
+        req.file.path
+      )}, description = ${db.escape(description)}, id_category = ${db.escape(
+        categoryId
+      )}, stock = ${db.escape(stock)} WHERE id_product = ${db.escape(
+        id_product
+      )} AND id_user = ${db.escape(userId)}`
+      const [result] = await db.query(query)
+      console.log(result)
+
+      res.status(200).json({ message: 'Product edited successfully' })
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ message: 'Internal server error' })
     }
   },
 }

@@ -9,5 +9,6 @@ router.post(
   productController.addProductsCurrentUser
 )
 router.get('/', productController.getProduct)
+router.put('/edit', upload.single('image'), productController.editProducts)
 
 module.exports = router
