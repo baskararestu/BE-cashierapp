@@ -102,7 +102,29 @@ const updateCategory = async (req, res) => {
   }
 }
 
+
+const getCategories = async (req, res) => {
+  const user_id = getUserIdFromToken(req, res)
+
+  const sql = `SELECT * FROM categories WHERE id_user = ?`
+
+  const [rows] = await db.execute(sql, [user_id])
+
+  if (rows.length > 0) {
+    return res.status(200).json({
+      message: 'Categories found',
+      data: rows,
+    })
+  }
+
+  return res.status(404).json({
+    message: 'Categories not found',
+    data: {},
+  })
+}
+
 module.exports = {
   addCategory,
   updateCategory,
+  getCategories,
 }

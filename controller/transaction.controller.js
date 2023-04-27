@@ -5,7 +5,7 @@ const { getUserIdFromToken } = require('../helper/jwt-payload.helper')
 const getTopSellingProducts = async (req, res) => {
   try {
     const id_user = getUserIdFromToken(req, res)
-    const category = req.query.category || null // filter by category or null
+    const category = parseInt(req.query?.category) || null // filter by category or null
     const limit = req.query.limit || 10
     const page = req.query.page || 1
     const offset = (page - 1) * limit
@@ -113,7 +113,7 @@ const getTotalTransaction = async (req, res) => {
     const [countRows] = await db.query(countSql, params)
     const total_transactions = countRows[0].total_transactions
 
-    const sql = `SELECT t.transaction_date, SUM(ti.quantity * p.price) AS gross_income FROM transactions t JOIN transaction_items ti ON t.id_transaction = ti.id_transaction JOIN products p ON ti.id_product = p.id_product WHERE t.id_user = ? ${dateFilter} GROUP BY t.transaction_date ORDER BY t.transaction_date DESC LIMIT ?, ?`
+    const sql = `SELECT t.transaction_date,SUM(ti.quantity) AS total_quantity, SUM(ti.quantity * p.price) AS gross_income FROM transactions t JOIN transaction_items ti ON t.id_transaction = ti.id_transaction JOIN products p ON ti.id_product = p.id_product WHERE t.id_user = ? ${dateFilter} GROUP BY t.transaction_date ORDER BY t.transaction_date DESC LIMIT ?, ?`
     const offset = (page - 1) * limit
     params.push(offset, limit)
     console.log(sql, params)
