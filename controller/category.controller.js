@@ -38,7 +38,6 @@ const addCategory = async (req, res) => {
       message: 'Failed to create category',
       data: {},
     })
-
   } catch (error) {
     return res.status(500).json({
       message: 'Internal server error',
@@ -93,7 +92,32 @@ const updateCategory = async (req, res) => {
       message: 'Failed to update category',
       data: {},
     })
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Internal server error',
+      data: {},
+    })
+  }
+}
 
+const getCategories = async (req, res) => {
+  try {
+    const user_id = getUserIdFromToken(req, res)
+
+    const sql = `SELECT * FROM categories WHERE id_user = ?`
+    const [rows] = await db.execute(sql, [user_id])
+
+    if (rows.length > 0) {
+      return res.status(200).json({
+        message: 'Categories fetched',
+        data: rows,
+      })
+    }
+
+    return res.status(404).json({
+      message: 'No categories found',
+      data: {},
+    })
   } catch (error) {
     return res.status(500).json({
       message: 'Internal server error',
@@ -105,4 +129,5 @@ const updateCategory = async (req, res) => {
 module.exports = {
   addCategory,
   updateCategory,
+  getCategories,
 }
