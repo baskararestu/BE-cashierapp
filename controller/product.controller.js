@@ -5,7 +5,7 @@ const { getUserIdFromToken } = require('../helper/jwt-payload.helper')
 module.exports = {
   addProductsCurrentUser: async (req, res) => {
     try {
-      const { name, price, image, description, id_category, stock } = req.body
+      const { name, price, image, description, category, stock } = req.body
       const authToken = req.headers.authorization?.split(' ')[1] // extract the token from the headers
       if (!authToken) {
         return res.status(401).json({ message: 'Unauthorized' })
@@ -15,21 +15,21 @@ module.exports = {
 
       // if the token is valid, the decodedToken object will contain the user's ID
       const userId = userToken.id
+      const { file } = req
+      const filepath = file ? '/' + file.filename : null
       console.log(userId)
-
-      // use the category name to get its id from the categories table
-      const selectCategoryQuery = `SELECT id_category FROM categories WHERE id_category = ${db.escape(
-        id_category
-      )}`
-      const [categoryResult] = await db.query(selectCategoryQuery)
-      const categoryId = categoryResult[0].id_category
+      console.log(req.body)
 
       //use the user ID to add the products
       const query = `INSERT INTO products (id_product, name, price,image,description,id_category,stock,id_user) VALUES (null, ${db.escape(
         name
-      )}, ${db.escape(price)},${db.escape(req.file.path)},${db.escape(
+      )}, ${db.escape(parseInt(price))},${db.escape(filepath)},${db.escape(
         description
-      )},${db.escape(categoryId)},${db.escape(stock)},${db.escape(userId)})`
+      )},${db.escape(parseInt(category))},${db.escape(
+        parseInt(stock)
+      )},${db.escape(userId)})`
+
+      console.log(query)
       const [result] = await db.query(query)
       console.log(result)
 
