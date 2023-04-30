@@ -11,5 +11,6 @@ router.post(
 router.get('/', productController.getProduct)
 router.get('/:id', productController.getProductById)
 router.put('/edit/:id', upload.single('image'), productController.editProducts)
+router.delete('/delete/:id', productController.deleteProductById)
 
 module.exports = router

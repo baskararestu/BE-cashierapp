@@ -172,7 +172,23 @@ module.exports = {
   },
 
   deleteProductById: async (req, res) => {
-    const user_id = getUserIdFromToken(req, res)
-    const id_product = req.params.id
+    try {
+      const userId = getUserIdFromToken(req, res)
+      const id_product = req.params.id
+      const query = `DELETE FROM products WHERE id_product=${db.escape(
+        id_product
+      )} AND id_user=${db.escape(userId)}`
+      const [result] = await db.query(query)
+      // console.log(result) <<<< kenapa result pas dicek kosong?
+      if (result && result.affectedRows !== 0) {
+        return res
+          .status(404)
+          .json({ message: 'Product has been deleted', isSuccess: true })
+      }
+      res.status(200).json(result[0])
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ message: 'Internal server error' })
+    }
   },
 }
