@@ -6,15 +6,7 @@ module.exports = {
   addProductsCurrentUser: async (req, res) => {
     try {
       const { name, price, image, description, category, stock } = req.body
-      const authToken = req.headers.authorization?.split(' ')[1] // extract the token from the headers
-      if (!authToken) {
-        return res.status(401).json({ message: 'Unauthorized' })
-      }
-      console.log(authToken)
-      const userToken = jwt.verify(authToken, 'rahasia') // verify the token using your secret key
-
-      // if the token is valid, the decodedToken object will contain the user's ID
-      const userId = userToken.id
+      const userId = getUserIdFromToken(req, res)
       const { file } = req
       const filepath = file ? '/' + file.filename : null
       console.log(userId)
@@ -33,7 +25,9 @@ module.exports = {
       const [result] = await db.query(query)
       console.log(result)
 
-      res.status(200).json({ message: 'Product added successfully' })
+      res
+        .status(200)
+        .json({ message: 'Product added successfully', isSuccess: true })
     } catch (error) {
       console.error(error)
       res.status(500).json({ message: 'Internal server error' })
@@ -41,14 +35,7 @@ module.exports = {
   },
   getProduct: async (req, res) => {
     try {
-      const authToken = req.headers.authorization?.split(' ')[1] // extract the token from the headers
-      if (!authToken) {
-        return res.status(401).json({ message: 'Unauthorized' })
-      }
-      console.log(authToken)
-      const userToken = jwt.verify(authToken, 'rahasia') // verify the token using your secret key
-      // if the token is valid, the decodedToken object will contain the user's ID
-      const userId = userToken.id
+      const userId = getUserIdFromToken(req, res)
 
       const page = parseInt(req.query.page) || 1
       const limit = parseInt(req.query.limit) || 10
@@ -132,15 +119,10 @@ module.exports = {
 
   editProducts: async (req, res) => {
     try {
-      const {
-        id_product,
-        name,
-        price,
-        image,
-        description,
-        id_category,
-        stock,
-      } = req.body
+      const { name, price, description, id_category, stock } = req.body
+      const id_product = req.params.id
+      const { file } = req
+      const filepath = file ? '/' + file.filename : null
       const userId = getUserIdFromToken(req, res)
       console.log(userId)
 
@@ -155,7 +137,7 @@ module.exports = {
       const query = `UPDATE products SET name = ${db.escape(
         name
       )}, price = ${db.escape(price)}, image = ${db.escape(
-        req.file.path
+        filepath
       )}, description = ${db.escape(description)}, id_category = ${db.escape(
         categoryId
       )}, stock = ${db.escape(stock)} WHERE id_product = ${db.escape(
@@ -169,5 +151,28 @@ module.exports = {
       console.error(error)
       res.status(500).json({ message: 'Internal server error' })
     }
+  },
+  getProductById: async (req, res) => {
+    try {
+      const id_product = req.params.id
+      const userId = getUserIdFromToken(req, res)
+      console.log(userId)
+      const query = `SELECT * FROM products WHERE id_product = ${db.escape(
+        id_product
+      )} AND id_user = ${db.escape(userId)}`
+      const [result] = await db.query(query)
+      if (result.length === 0) {
+        return res.status(404).json({ message: 'Product not found' })
+      }
+      res.status(200).json(result[0])
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ message: 'Internal server error' })
+    }
+  },
+
+  deleteProductById: async (req, res) => {
+    const user_id = getUserIdFromToken(req, res)
+    const id_product = req.params.id
   },
 }
