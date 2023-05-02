@@ -14,11 +14,11 @@ module.exports = {
 
       //use the user ID to add the products
       const query = `INSERT INTO products (id_product, name, price,image,description,id_category,stock,id_user) VALUES (null, ${db.escape(
-        name
+              name,
       )}, ${db.escape(parseInt(price))},${db.escape(filepath)},${db.escape(
-        description
+              description,
       )},${db.escape(parseInt(category))},${db.escape(
-        parseInt(stock)
+              parseInt(stock),
       )},${db.escape(userId)})`
 
       console.log(query)
@@ -119,30 +119,43 @@ module.exports = {
 
   editProducts: async (req, res) => {
     try {
-      const { name, price, description, id_category, stock } = req.body
+      const { name, price, description, category, stock } = req.body
       const id_product = req.params.id
       const { file } = req
       const filepath = file ? '/' + file.filename : null
       const userId = getUserIdFromToken(req, res)
-      console.log(userId)
 
-      // use the category name to get its id from the categories table
-      const selectCategoryQuery = `SELECT id_category FROM categories WHERE id_category = ${db.escape(
-        id_category
-      )}`
-      const [categoryResult] = await db.query(selectCategoryQuery)
-      const categoryId = categoryResult[0].id_category
+      console.log(file)
+
+      // // use the category name to get its id from the categories table
+      // const selectCategoryQuery = `SELECT id_category FROM categories WHERE id_category = ${db.escape(
+      //         category,
+      // )}`
+      // const [categoryResult] = await db.query(selectCategoryQuery)
+      const categoryId = category;
 
       //use the user ID to edit the products
-      const query = `UPDATE products SET name = ${db.escape(
-        name
-      )}, price = ${db.escape(price)}, image = ${db.escape(
-        filepath
-      )}, description = ${db.escape(description)}, id_category = ${db.escape(
-        categoryId
-      )}, stock = ${db.escape(stock)} WHERE id_product = ${db.escape(
-        id_product
-      )} AND id_user = ${db.escape(userId)}`
+      let query
+      if (file) {
+        // do delete old image
+        query = `UPDATE products SET name = ${db.escape(
+                name,
+        )}, price = ${db.escape(price)}, image = ${db.escape(
+                filepath,
+        )}, description = ${db.escape(description)}, id_category = ${db.escape(
+                categoryId,
+        )}, stock = ${db.escape(stock)} WHERE id_product = ${db.escape(
+                id_product,
+        )} AND id_user = ${db.escape(userId)}`
+      } else {
+        query = `UPDATE products SET name = ${db.escape(
+                name,
+        )}, price = ${db.escape(price)}, description = ${db.escape(description)}, id_category = ${db.escape(
+                categoryId,
+        )}, stock = ${db.escape(stock)} WHERE id_product = ${db.escape(
+                id_product,
+        )} AND id_user = ${db.escape(userId)}`
+      }
       const [result] = await db.query(query)
       console.log(result)
 
@@ -158,7 +171,7 @@ module.exports = {
       const userId = getUserIdFromToken(req, res)
       console.log(userId)
       const query = `SELECT * FROM products WHERE id_product = ${db.escape(
-        id_product
+              id_product,
       )} AND id_user = ${db.escape(userId)}`
       const [result] = await db.query(query)
       if (result.length === 0) {
@@ -176,7 +189,7 @@ module.exports = {
       const userId = getUserIdFromToken(req, res)
       const id_product = req.params.id
       const query = `DELETE FROM products WHERE id_product=${db.escape(
-        id_product
+              id_product,
       )} AND id_user=${db.escape(userId)}`
       const [result] = await db.query(query)
       // console.log(result) <<<< kenapa result pas dicek kosong?
