@@ -18,7 +18,9 @@ const getTopSellingProducts = async (req, res) => {
       params = [id_user, limit, offset]
     }
     const [rows] = await db.query(sql, params)
-    const countSql = `SELECT COUNT(DISTINCT p.name) as count FROM transactions t JOIN transaction_items td ON t.id_transaction = td.id_transaction JOIN products p ON td.id_product = p.id_product WHERE t.id_user = ? ${category ? 'AND p.id_category = ?' : ''};`
+    const countSql = `SELECT COUNT(DISTINCT p.name) as count FROM transactions t JOIN transaction_items td ON t.id_transaction = td.id_transaction JOIN products p ON td.id_product = p.id_product WHERE t.id_user = ? ${
+      category ? 'AND p.id_category = ?' : ''
+    };`
     const countParams = category ? [id_user, category] : [id_user]
     const [countRows] = await db.query(countSql, countParams)
     const total = countRows[0].count
@@ -26,7 +28,7 @@ const getTopSellingProducts = async (req, res) => {
     return res.status(200).json({
       message: 'Success',
       data: rows,
-      pages:{
+      pages: {
         current: page,
         total: totalPages,
       },
@@ -62,13 +64,17 @@ const getGrossIncomeByDate = async (req, res) => {
 
     // Add pagination
     const offset = (page - 1) * limit
-    sql += ' GROUP BY t.transaction_date ORDER BY t.transaction_date DESC LIMIT ? OFFSET ?'
+    sql +=
+      ' GROUP BY t.transaction_date ORDER BY t.transaction_date DESC LIMIT ? OFFSET ?'
     params.push(parseInt(limit), offset)
 
     const [rows] = await db.query(sql, params)
 
     // Get total count for pagination
-    const [countRows] = await db.query(`SELECT COUNT(DISTINCT t.transaction_date) as total_count FROM transactions t JOIN transaction_items ti ON t.id_transaction = ti.id_transaction JOIN products p ON ti.id_product = p.id_product WHERE t.id_user = ?`, [id_user])
+    const [countRows] = await db.query(
+      `SELECT COUNT(DISTINCT t.transaction_date) as total_count FROM transactions t JOIN transaction_items ti ON t.id_transaction = ti.id_transaction JOIN products p ON ti.id_product = p.id_product WHERE t.id_user = ?`,
+      [id_user]
+    )
     const total = countRows[0].total_count
 
     return res.status(200).json({
@@ -125,10 +131,10 @@ const getTotalTransaction = async (req, res) => {
     return res.status(200).json({
       message: 'Success',
       data: rows,
-      pages:{
+      pages: {
         current: page,
         total: total_pages,
-      }
+      },
     })
   } catch (error) {
     console.error(error)
@@ -138,9 +144,50 @@ const getTotalTransaction = async (req, res) => {
   }
 }
 
+const addNewTransaction = async (req, res) => {
+  try {
+    const id_user = getUserIdFromToken(req, res)
+    const { items, total_amount } = req.body
+
+    // Insert a new row into the `transactions` table
+    const [resp] = await db.query('INSERT INTO transactions SET ?', {
+      id_user,
+      transaction_date: new Date(),
+      total_amount,
+    })
+
+    const id_transaction = resp.insertId
+
+    // Insert multiple rows into the `transaction_items` table using a bulk insert
+    const values = items.map((item) => [
+      id_transaction,
+      item.id_product,
+      item.quantity,
+    ])
+    await db.query(
+      'INSERT INTO transaction_items (id_transaction, id_product, quantity) VALUES ?',
+      [values]
+    )
+
+    return res.status(201).json({
+      message: 'Success',
+      data: {
+        id_transaction,
+        total_amount,
+      },
+    })
+  } catch (error) {
+    console.error(error)
+
+    return res.status(500).json({
+      message: 'Internal Server Error',
+    })
+  }
+}
 
 module.exports = {
   getTopSellingProducts,
   getGrossIncomeByDate,
   getTotalTransaction,
+  addNewTransaction,
 }
