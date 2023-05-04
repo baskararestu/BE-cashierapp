@@ -14,11 +14,11 @@ module.exports = {
 
       //use the user ID to add the products
       const query = `INSERT INTO products (id_product, name, price,image,description,id_category,stock,id_user) VALUES (null, ${db.escape(
-              name,
+        name
       )}, ${db.escape(parseInt(price))},${db.escape(filepath)},${db.escape(
-              description,
+        description
       )},${db.escape(parseInt(category))},${db.escape(
-              parseInt(stock),
+        parseInt(stock)
       )},${db.escape(userId)})`
 
       console.log(query)
@@ -59,7 +59,7 @@ module.exports = {
       })
     } catch (error) {
       console.error(error)
-      res.status(500).json({ message: 'Internal server error' })
+      res.status(500).json({ message: error.message })
     }
   },
 
@@ -132,28 +132,30 @@ module.exports = {
       //         category,
       // )}`
       // const [categoryResult] = await db.query(selectCategoryQuery)
-      const categoryId = category;
+      const categoryId = category
 
       //use the user ID to edit the products
       let query
       if (file) {
         // do delete old image
         query = `UPDATE products SET name = ${db.escape(
-                name,
+          name
         )}, price = ${db.escape(price)}, image = ${db.escape(
-                filepath,
+          filepath
         )}, description = ${db.escape(description)}, id_category = ${db.escape(
-                categoryId,
+          categoryId
         )}, stock = ${db.escape(stock)} WHERE id_product = ${db.escape(
-                id_product,
+          id_product
         )} AND id_user = ${db.escape(userId)}`
       } else {
         query = `UPDATE products SET name = ${db.escape(
-                name,
-        )}, price = ${db.escape(price)}, description = ${db.escape(description)}, id_category = ${db.escape(
-                categoryId,
-        )}, stock = ${db.escape(stock)} WHERE id_product = ${db.escape(
-                id_product,
+          name
+        )}, price = ${db.escape(price)}, description = ${db.escape(
+          description
+        )}, id_category = ${db.escape(categoryId)}, stock = ${db.escape(
+          stock
+        )} WHERE id_product = ${db.escape(
+          id_product
         )} AND id_user = ${db.escape(userId)}`
       }
       const [result] = await db.query(query)
@@ -171,7 +173,7 @@ module.exports = {
       const userId = getUserIdFromToken(req, res)
       console.log(userId)
       const query = `SELECT * FROM products WHERE id_product = ${db.escape(
-              id_product,
+        id_product
       )} AND id_user = ${db.escape(userId)}`
       const [result] = await db.query(query)
       if (result.length === 0) {
@@ -189,7 +191,7 @@ module.exports = {
       const userId = getUserIdFromToken(req, res)
       const id_product = req.params.id
       const query = `DELETE FROM products WHERE id_product=${db.escape(
-              id_product,
+        id_product
       )} AND id_user=${db.escape(userId)}`
       const [result] = await db.query(query)
       // console.log(result) <<<< kenapa result pas dicek kosong?
